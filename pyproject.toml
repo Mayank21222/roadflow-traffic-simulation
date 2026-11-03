@@ -1,0 +1,8 @@
+[project]
+name = "roadflow-traffic-simulation"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = []
+
+[tool.vercel]
+entrypoint = "app.wsgi:app"
