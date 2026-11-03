@@ -32,7 +32,7 @@ The engine (`app/engine.py`) is independent of the HTTP/UI layer. It uses a seed
 
 ## Architecture
 
-`app/engine.py` holds routing, signals, capacity, movement and metrics. `app/demo.py` holds the synthetic scenario. `app/server.py` provides `GET /api/scenario` and `POST /api/run`; `web/` is a dependency-free browser client. The browser exports JSON locally, without storing data remotely.
+`app/engine.py` holds routing, signals, capacity, movement and metrics. `app/demo.py` holds the synthetic scenario. `app/server.py` provides `GET /api/scenario` and `POST /api/run`; `app/wsgi.py` exposes the same app as a WSGI entrypoint for serverless hosting; `web/` is a dependency-free browser client. The browser exports JSON locally, without storing data remotely.
 
 ## Verification
 
@@ -44,13 +44,14 @@ The model is deliberately aggregate: no lane changing, vehicle classes, turning 
 
 ## Deployment
 
-Status: **not deployed**. The application is local-only by default: `app/server.py` binds to `127.0.0.1:8000` and has no authentication or rate limiting.
+Live application: <https://roadflow-traffic-simulation.vercel.app>
 
-A free deployment is practical on [Render](https://render.com/) as a Python web service, but the current server must first be made deployment-aware:
+The app is deployed on Vercel's free Hobby plan using the Python runtime. Vercel runs `app/wsgi.py` as a WSGI function; `vercel.json` routes all requests to it, and `pyproject.toml` selects Python 3.12. The function serves both the static client and the two API endpoints. This is a serverless deployment: there is no persistent process, and cold starts may add latency.
 
-1. In `app/server.py`, bind to `0.0.0.0` and read the port from the environment, for example `host = os.environ.get("HOST", "127.0.0.1")` and `port = int(os.environ.get("PORT", "8000"))`, then pass both to `ThreadingHTTPServer`.
-2. Push the repository to GitHub and create a Render **Web Service** with the Python runtime.
-3. Set the start command to `python3 -m app.server` and the environment variable `HOST=0.0.0.0`. Render supplies `PORT` (default 10000).
-4. Use the free instance plan. Free services spin down after 15 minutes of inactivity and take about a minute to wake.
+For a persistent web-service deployment such as [Render](https://render.com/), `app/server.py` now reads `HOST` and `PORT`:
 
-No deployment was performed in this session, so no public URL is claimed. Hugging Face Docker Spaces now require a paid plan; GitHub Pages cannot run the Python API; PythonAnywhere's free tier would need a WSGI adapter. A tunnel to the local server can provide a temporary share, but it is not a durable deployment.
+- `HOST` defaults to `127.0.0.1`; set `HOST=0.0.0.0` on the host.
+- `PORT` defaults to `8000`; the host-provided port is used when set.
+- Start command: `python3 -m app.server`.
+
+Render's free web service remains suitable, but no Render credentials were available in this environment, so the live deployment uses Vercel. The deployment is unauthenticated and has no rate limiting; it uses only synthetic demo data.

@@ -41,6 +41,20 @@ After the slider step was corrected from `.05` to `.01`, the default browser run
 
 To reproduce manually, start `python3 -m app.server`, open `http://127.0.0.1:8000`, adjust both demand sliders and seed, run/reset, and use both export buttons.
 
+## Hosted deployment verification
+
+The live deployment is <https://roadflow-traffic-simulation.vercel.app>, built from the repository's Vercel configuration. Vercel's free Hobby plan runs `app/wsgi.py` as a Python WSGI function; no paid features are used. Render and Railway were not used because no Render credentials were available and the Railway token had expired.
+
+Verified against the public URL:
+
+- `GET /`, `/app.js`, `/style.css`, and `/status.css` returned 200 with the expected HTML/CSS/JavaScript content types.
+- `GET /api/scenario` returned 200 with the built-in synthetic scenario.
+- `POST /api/run` with `{"ticks":80}` returned 200 with 83 generated, 76 completed, 7 active, 6.14 average travel, 1.14 average waiting, and maximum queue 4.
+- Malformed JSON returned 400, an unknown path returned 404, and an unsupported method returned 405.
+- Headless Chrome 156 through the Chrome DevTools Protocol loaded the public page, found the initial `0.62`/`0.42` demand and 80 ticks, ran the simulation, displayed “Completed 80 ticks: 76 vehicles completed.” with all six metrics and five road rows, enabled results export, and restored the controls/cleared results on Reset.
+- No browser console errors remained after adding an inline empty favicon to suppress the browser's automatic `/favicon.ico` request.
+- Vercel runtime logs recorded the function invocations. Serverless cold starts can add latency; the verified run completed successfully.
+
 ## Model validation status
 
 No real-world calibration or observational validation has been performed. The tests validate implementation rules, not predictive validity.

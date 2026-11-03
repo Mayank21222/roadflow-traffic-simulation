@@ -8,7 +8,7 @@ OpenCode's own session data remains under `/Users/mayankkashyap/.local/share/ope
 
 ## Scope
 
-Read-only verification first, followed by two approved bug fixes and documentation updates. No model, demo scenario, architecture, or Git-history rewrite.
+Read-only verification first, followed by two approved bug fixes, deployment support, and documentation updates. No model, demo scenario, architecture, or Git-history rewrite.
 
 ## Verified before changes
 
@@ -23,17 +23,20 @@ Read-only verification first, followed by two approved bug fixes and documentati
 
 1. Demand sliders used `step=".05"`, so `0.62`/`0.42` were snapped to `0.6`/`0.4`. The default UI run therefore produced 82/75, not the documented 83/76, and Reset restored the wrong values. Fixed by using `step=".01"` in `web/index.html`.
 2. Results export paired the current controls with the last run's results. Fixed by storing the scenario used in `run()` and exporting that with `lastResults` in `web/app.js`; Reset clears it.
-3. Documentation updated: `README.md` records the Render deployment path/status and the flyover limitation; `VALIDATION.md` records the later browser checks and the corrected demo figures.
+3. Documentation updated: `README.md` records the deployment status and the flyover limitation; `VALIDATION.md` records the later browser and hosted-deployment checks and the corrected demo figures.
+4. Deployment support added: `app/server.py` reads `HOST`/`PORT`, and `app/wsgi.py` plus `pyproject.toml`/`vercel.json` provide a Vercel WSGI entrypoint. The first Vercel build used the project's “Other” preset and served 404s; the explicit `vercel.json` build/routes fixed it. An automatic `/favicon.ico` request produced the only remaining console error, suppressed with an inline empty favicon.
 
 ## Verified after changes
 
 - 14/14 tests and compilation pass.
 - Fresh server/API smoke: 83 generated, 76 completed, 7 active, 6.14 travel, 1.14 waiting, maximum queue 4.
 - Fresh headless Chrome: initial 0.62/0.42, default run 83/76, results export remains paired with the run scenario after controls change, Reset restores 0.62/0.42 and clears results, no console errors, no horizontal overflow at 390px.
+- Public Vercel deployment verified at <https://roadflow-traffic-simulation.vercel.app>: static assets 200, `/api/scenario` 200, valid `/api/run` 200 with 83/76/7 and the documented metrics, malformed JSON 400, unknown path 404, unsupported method 405, and a full headless-Chrome run/reset with no console errors.
 - The final bundle is regenerated after the commits, cloned successfully, and checked against the active HEAD and checksum file.
 
 ## Limitations
 
 - Browser checks were headless/DOM checks; screenshots were captured but not visually inspected because the verification model cannot read image input.
-- No deployment was performed; no public URL is claimed.
+- The live deployment is serverless on Vercel's free Hobby plan, not the preferred Render web service; no Render credentials were available and the Railway token had expired. Serverless cold starts may add latency.
+- The original Codex JSONL was shared as an unlisted gist; it is not in this repository. The repository itself contains no credentials.
 - No real-world calibration or validation was added.
