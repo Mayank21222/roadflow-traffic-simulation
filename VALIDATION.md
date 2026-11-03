@@ -9,7 +9,7 @@ python3 -m unittest discover -v
 PYTHONPYCACHEPREFIX=/private/tmp/roadflow-pycache python3 -m compileall -q app tests
 ```
 
-At the latest verification in this session, the unit suite passed **13/13** tests:
+At the latest verification in this session, the unit suite passed **14/14** tests:
 
 - connected and prohibited routing;
 - vehicle movement/completion;
