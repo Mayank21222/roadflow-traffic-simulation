@@ -1,0 +1,39 @@
+# OpenCode verification record
+
+This is a human-readable record of the later OpenCode verification and fix session. It is not the raw session log. The original Codex build session log remains untouched at:
+
+`/Users/mayankkashyap/.codex/sessions/2026/11/03/rollout-2026-11-03T09-40-03-01a19f99-911d-7c92-8709-2d7a7534f0b9.jsonl`
+
+OpenCode's own session data remains under `/Users/mayankkashyap/.local/share/opencode/` (`opencode.db`, `log/opencode.log`); it was not edited.
+
+## Scope
+
+Read-only verification first, followed by two approved bug fixes and documentation updates. No model, demo scenario, architecture, or Git-history rewrite.
+
+## Verified before changes
+
+- `python3 -m unittest discover -v`: 14/14 passed.
+- `python3 -m compileall -q app tests`: exit 0.
+- Deterministic 80-tick demo: 83 generated, 76 completed, 7 active, 6.14 average travel, 1.14 average waiting, maximum queue 4.
+- HTTP: static assets 200, `/api/scenario` 200, valid `/api/run` 200, malformed JSON/scenario 400, unknown path 404, tick clamping.
+- Headless Chrome 156 through the Chrome DevTools Protocol: initial network (5 roads, 7 nodes, 1 signal, 1 flyover), run, reset, both exports, no console errors, no horizontal overflow at 360–1024px.
+- Git bundle cloned; bundle HEAD matched active HEAD; working tree matched HEAD.
+
+## Issues found and fixed
+
+1. Demand sliders used `step=".05"`, so `0.62`/`0.42` were snapped to `0.6`/`0.4`. The default UI run therefore produced 82/75, not the documented 83/76, and Reset restored the wrong values. Fixed by using `step=".01"` in `web/index.html`.
+2. Results export paired the current controls with the last run's results. Fixed by storing the scenario used in `run()` and exporting that with `lastResults` in `web/app.js`; Reset clears it.
+3. Documentation updated: `README.md` records the Render deployment path/status and the flyover limitation; `VALIDATION.md` records the later browser checks and the corrected demo figures.
+
+## Verified after changes
+
+- 14/14 tests and compilation pass.
+- Fresh server/API smoke: 83 generated, 76 completed, 7 active, 6.14 travel, 1.14 waiting, maximum queue 4.
+- Fresh headless Chrome: initial 0.62/0.42, default run 83/76, results export remains paired with the run scenario after controls change, Reset restores 0.62/0.42 and clears results, no console errors, no horizontal overflow at 390px.
+- The final bundle is regenerated after the commits, cloned successfully, and checked against the active HEAD and checksum file.
+
+## Limitations
+
+- Browser checks were headless/DOM checks; screenshots were captured but not visually inspected because the verification model cannot read image input.
+- No deployment was performed; no public URL is claimed.
+- No real-world calibration or validation was added.
