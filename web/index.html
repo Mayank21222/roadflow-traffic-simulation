@@ -6,8 +6,8 @@
 <main><aside>
 <h2>Scenario</h2><label>Scenario<select id="scenario"><option>Synthetic Central Flyover</option></select></label>
 <label>Random seed<input id="seed" type="number" value="42"></label>
-<label>West → East demand / tick<input id="westRate" type="range" min="0" max="1" step=".05" value=".62"><output id="westOut">0.62</output></label>
-<label>North → South demand / tick<input id="northRate" type="range" min="0" max="1" step=".05" value=".42"><output id="northOut">0.42</output></label>
+<label>West → East demand / tick<input id="westRate" type="range" min="0" max="1" step=".01" value=".62"><output id="westOut">0.62</output></label>
+<label>North → South demand / tick<input id="northRate" type="range" min="0" max="1" step=".01" value=".42"><output id="northOut">0.42</output></label>
 <label>Simulation ticks<input id="ticks" type="number" min="1" max="5000" value="80"></label>
 <div class="actions"><button id="run">Run simulation</button><button id="reset" class="quiet">Reset</button></div>
 <div class="actions"><button id="exportScenario" class="quiet">Export scenario</button><button id="exportResults" class="quiet" disabled>Export results</button></div><p id="status" class="status" aria-live="polite">Ready with synthetic demo inputs.</p>

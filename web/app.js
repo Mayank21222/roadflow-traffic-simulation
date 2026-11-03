@@ -1,4 +1,4 @@
-let baseScenario, lastResults;
+let baseScenario, lastResults, lastScenario;
 const $ = (id) => document.getElementById(id);
 
 function scenarioFromControls() {
@@ -32,14 +32,14 @@ async function run() {
     const scenario=scenarioFromControls();
     const response=await fetch("/api/run", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scenario,ticks:Number($("ticks").value)})});
     const payload=await response.json(); if (!response.ok) throw new Error(payload.error);
-    lastResults=payload.results; renderResults(lastResults); renderNetwork(scenario); $("exportResults").disabled=false;
+    lastResults=payload.results; lastScenario=scenario; renderResults(lastResults); renderNetwork(scenario); $("exportResults").disabled=false;
     $("status").textContent=`Completed ${lastResults.tick} ticks: ${lastResults.completed} vehicles completed.`;
   } catch(error) { $("status").textContent=`Simulation could not run: ${error.message}`; alert(`Simulation could not run: ${error.message}`); }
   finally {button.textContent="Run simulation";button.disabled=false;}
 }
 for (const id of ["westRate","northRate"]) $(id).addEventListener("input", () => $(id === "westRate" ? "westOut" : "northOut").value=$(id).value);
 $("run").addEventListener("click",run);
-$("reset").addEventListener("click",()=>{ $("seed").value=baseScenario.seed;$("westRate").value=baseScenario.demand[0].rate;$("northRate").value=baseScenario.demand[1].rate;$("westOut").value=$("westRate").value;$("northOut").value=$("northRate").value;$("ticks").value=80;lastResults=null;$("exportResults").disabled=true;$("status").textContent="Controls reset to synthetic demo inputs.";renderNetwork(baseScenario);$("metrics").innerHTML="";$("roadTable").innerHTML="";});
+$("reset").addEventListener("click",()=>{ $("seed").value=baseScenario.seed;$("westRate").value=baseScenario.demand[0].rate;$("northRate").value=baseScenario.demand[1].rate;$("westOut").value=$("westRate").value;$("northOut").value=$("northRate").value;$("ticks").value=80;lastResults=null;lastScenario=null;$("exportResults").disabled=true;$("status").textContent="Controls reset to synthetic demo inputs.";renderNetwork(baseScenario);$("metrics").innerHTML="";$("roadTable").innerHTML="";});
 $("exportScenario").addEventListener("click",()=>download("roadflow-scenario.json",scenarioFromControls()));
-$("exportResults").addEventListener("click",()=>download("roadflow-results.json",{scenario:scenarioFromControls(),results:lastResults}));
+$("exportResults").addEventListener("click",()=>download("roadflow-results.json",{scenario:lastScenario,results:lastResults}));
 baseScenario=await (await fetch("/api/scenario")).json();renderNetwork(baseScenario);

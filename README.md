@@ -36,12 +36,21 @@ The engine (`app/engine.py`) is independent of the HTTP/UI layer. It uses a seed
 
 ## Verification
 
-`tests/test_engine.py` covers valid/disconnected routing, vehicle completion, signal waiting, road capacity queues, flyover separation, metric creation, and fixed-seed repeatability. Run the command above before changing the model.
+`tests/test_engine.py` covers valid/disconnected routing, vehicle completion, signal waiting, road capacity queues, flyover separation, metric creation, and fixed-seed repeatability. Run the command above before changing the model. The browser workflow was also checked with headless Chrome; see `VALIDATION.md` for the exact checks and their limits.
 
 ## Known limitations
 
-The model is deliberately aggregate: no lane changing, vehicle classes, turning geometry, collision avoidance, dynamic route choice, pedestrian phases, spillback beyond exit queues, or real-world calibration. Map geometry is a schematic and does not represent a surveyed road layout.
+The model is deliberately aggregate: no lane changing, vehicle classes, turning geometry, collision avoidance, dynamic route choice, pedestrian phases, spillback beyond exit queues, or real-world calibration. Map geometry is a schematic and does not represent a surveyed road layout. The demo flyover is isolated and carries no demand, so it shows 0% utilisation; its grade separation is covered by the routing test rather than by visible traffic.
 
 ## Deployment
 
-Not deployed. This repository is designed to run locally with the standard Python library; no deployment was attempted or claimed.
+Status: **not deployed**. The application is local-only by default: `app/server.py` binds to `127.0.0.1:8000` and has no authentication or rate limiting.
+
+A free deployment is practical on [Render](https://render.com/) as a Python web service, but the current server must first be made deployment-aware:
+
+1. In `app/server.py`, bind to `0.0.0.0` and read the port from the environment, for example `host = os.environ.get("HOST", "127.0.0.1")` and `port = int(os.environ.get("PORT", "8000"))`, then pass both to `ThreadingHTTPServer`.
+2. Push the repository to GitHub and create a Render **Web Service** with the Python runtime.
+3. Set the start command to `python3 -m app.server` and the environment variable `HOST=0.0.0.0`. Render supplies `PORT` (default 10000).
+4. Use the free instance plan. Free services spin down after 15 minutes of inactivity and take about a minute to wake.
+
+No deployment was performed in this session, so no public URL is claimed. Hugging Face Docker Spaces now require a paid plan; GitHub Pages cannot run the Python API; PythonAnywhere's free tier would need a WSGI adapter. A tunnel to the local server can provide a temporary share, but it is not a durable deployment.
