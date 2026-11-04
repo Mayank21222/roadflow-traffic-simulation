@@ -16,9 +16,10 @@ shasum -a 256 -c roadflow-history.bundle.sha256
 The bundle is intentionally not committed: a bundle cannot include the commit that would record the bundle itself. Regenerate the bundle and checksum after later commits with:
 
 ```bash
-git --git-dir=/private/tmp/roadflow-git --work-tree=/Users/mayankkashyap/Desktop/Project2 bundle create /Users/mayankkashyap/Desktop/Project2/roadflow-history.bundle --all
-shasum -a 256 /Users/mayankkashyap/Desktop/Project2/roadflow-history.bundle > /Users/mayankkashyap/Desktop/Project2/roadflow-history.bundle.sha256
-shasum -a 256 -c /Users/mayankkashyap/Desktop/Project2/roadflow-history.bundle.sha256
+cd /Users/mayankkashyap/Desktop/Project2
+git --git-dir=/private/tmp/roadflow-git --work-tree=/Users/mayankkashyap/Desktop/Project2 bundle create roadflow-history.bundle --all
+shasum -a 256 roadflow-history.bundle > roadflow-history.bundle.sha256
+shasum -a 256 -c roadflow-history.bundle.sha256
 ```
 
 The latest commit hash and bundle checksum are available from `git log` and the checksum file; they are deliberately not duplicated here because the bundle is regenerated after the documentation commit. The later OpenCode verification and fix record is in `OPENCODE_VERIFICATION.md`; the original Codex JSONL session log is not modified.

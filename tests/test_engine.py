@@ -86,6 +86,34 @@ class EngineTests(unittest.TestCase):
         scenario["demand"] = ["not an object"]
         with self.assertRaises(ScenarioError):
             Simulation(scenario)
+        scenario = deepcopy(self.scenario)
+        scenario["signals"][0]["phases"][0]["movements"] = None
+        with self.assertRaises(ScenarioError):
+            Simulation(scenario)
+
+    def test_lane_counts_must_be_integers(self):
+        scenario = deepcopy(self.scenario)
+        scenario["roads"][0]["lanes"] = "2"
+        self.assertEqual(Simulation(scenario).road_capacity("west_in"), 12)
+        scenario = deepcopy(self.scenario)
+        scenario["roads"][0]["lanes"] = 2.5
+        with self.assertRaises(ScenarioError):
+            Simulation(scenario)
+
+    def test_capacity_must_be_integer(self):
+        scenario = deepcopy(self.scenario)
+        scenario["roads"][0]["capacity"] = "12"
+        self.assertEqual(Simulation(scenario).road_capacity("west_in"), 12)
+        scenario = deepcopy(self.scenario)
+        scenario["roads"][0]["capacity"] = 12.5
+        with self.assertRaises(ScenarioError):
+            Simulation(scenario)
+
+    def test_null_seed_is_rejected(self):
+        scenario = deepcopy(self.scenario)
+        scenario["seed"] = None
+        with self.assertRaises(ScenarioError):
+            Simulation(scenario)
 
     def test_invalid_signal_movement_is_rejected(self):
         scenario = deepcopy(self.scenario)

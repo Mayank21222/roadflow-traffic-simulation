@@ -8,7 +8,7 @@ OpenCode's own session data remains under `/Users/mayankkashyap/.local/share/ope
 
 ## Scope
 
-Read-only verification first, followed by two approved bug fixes, deployment support, documentation updates, and a final scenario enhancement. The simulation engine was not changed. The baseline scenario data and its 83/76 result were preserved; the new scenarios were added alongside it. No Git-history rewrite.
+Read-only verification first, followed by two approved bug fixes, deployment support, documentation updates, and a scenario enhancement. A later independent audit added engine validation guards, a UI stale-run guard, and accessibility/documentation fixes. The baseline scenario data and its 83/76 result were preserved throughout; the new scenarios were added alongside it. No Git-history rewrite.
 
 ## Verified before changes
 
@@ -40,18 +40,41 @@ The final requested enhancement added a functional scenario selector and two new
 
 - **Synthetic Central Flyover** remains unchanged and still produces 83 generated / 76 completed at 80 ticks.
 - **Active Flyover Crossing** adds connected entry/exit ramps, two elevated road segments, a separate `fly_cross` node at the same coordinates as the ground `junction`, and ground-level turning demand. The junction signal omits the direct north-to-south ground movement, so that demand routes over the flyover. There is no edge between `junction` and `fly_cross`.
-- **Road Capacity Comparison** runs two parallel corridors under the same demand, with explicit narrow capacities 4/1 and wide capacities 12/6.
+- **Road Capacity Comparison** runs two parallel corridors under the same demand rate, with explicit narrow capacities 4/1 and wide capacities 12/6. The corridors share one seeded RNG stream but each demand entry draws independently, so realized arrivals are not paired.
 
 `GET /api/scenarios` was added for the catalog; `GET /api/scenario` remains for compatibility. The browser now builds demand sliders from the selected scenario, updates the network view, and distinguishes at-grade, elevated, and ramp roads. The engine, API payload contract, and local JSON export flow were retained.
 
 Verified after the enhancement:
 
-- `python3 -m unittest discover -v`: **21/21** passed; `compileall` passed.
+- `python3 -m unittest discover -v`: **21/21** passed at that point; the later audit raised the suite to **24/24**; `compileall` passed.
 - Baseline 80-tick result unchanged: 83 generated, 76 completed, 7 active, 6.14 travel, 1.14 waiting, maximum queue 4.
 - Active Flyover Crossing: 113 generated, 103 completed, 10 active, 7.06 travel, 0.74 waiting, maximum queue 6; both elevated segments and both ramps had non-zero utilisation. Routing and separation tests pass.
 - Road Capacity Comparison: 120 generated, 111 completed, 9 active, 6.23 travel, 1.23 waiting, maximum queue 3; narrow road 84% vs wide road 24%, narrow exit 96% vs wide exit 31%.
 - Local and live headless Chrome runs: all three scenarios selected and ran; descriptions, networks, demand controls, seed, and ticks updated; Reset cleared results and restored scenario defaults; both JSON exports parsed; no console errors; no horizontal overflow at 390px.
 - The existing Vercel project was redeployed and the public URL was verified: `/api/scenarios` returned 200, each scenario returned the expected 80-tick result, and the live browser workflow passed.
+
+## Final independent audit
+
+A final audit reviewed correctness, API/error handling, determinism, UI behavior, documentation, deployment, and session provenance. It did not change scenario demand, capacities, routing, or the documented baseline metrics.
+
+Fixed in the audit:
+
+- `seed: null` is rejected instead of producing nondeterministic output.
+- Lane counts and explicit capacities must be integers; numeric strings such as `"2"` are accepted and normalized, fractional values are rejected.
+- `movements: null` is rejected as a scenario error instead of raising `TypeError`.
+- A run token now prevents a delayed `/api/run` response from rendering after the scenario or controls change.
+- Results export remains paired with the scenario and metrics that produced it; scenario export remains paired with the current controls.
+- Accessibility/documentation fixes: explicit SVG `role="img"`, "Synthetic simulation" badge, corrected demand-rate wording, capacity RNG limitation, dependency wording, transfer-tick assumption, and relative checksum command.
+
+Verified after the audit:
+
+- `python3 -m unittest discover -v`: **24/24** passed; `compileall` passed.
+- Deterministic 80-tick results were unchanged: baseline 83/76/7, 6.14 travel, 1.14 waiting, maximum queue 4; Active Flyover Crossing 113/103/10, 7.06 travel, 0.74 waiting, maximum queue 6; Road Capacity Comparison 120/111/9, 6.23 travel, 1.23 waiting, maximum queue 3.
+- High demand produced 177 generated, 167 completed, 10 active, maximum queue 5. Zero-demand and empty runs reconciled; no capacity overflow was observed in the stepped audit.
+- Local HTTP and direct WSGI checks passed for all three scenarios, malformed input (400), unknown paths/path traversal (404), unsupported WSGI methods (405), and tick clamping.
+- Headless Chrome verified the stale-run race, export pairing, reset, all three scenario metrics/networks, accessibility basics, no horizontal overflow at 320–1440px, and no console errors.
+- Provenance: the original Codex JSONL is untouched and matches the unlisted gist. The later work used one OpenCode session (`ses_e6050ec1fffet4Spnk2j56Xzxs`). All commit author metadata reads `Codex <codex@local>` because of local Git configuration; later commits are OpenCode work.
+- **Critical process finding:** `prompt.md` requests one Codex/Claude session, but later work used OpenCode. This cannot be corrected without falsifying history, so it is disclosed in `VALIDATION.md` and here.
 
 ## Limitations
 

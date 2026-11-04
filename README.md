@@ -4,7 +4,7 @@ Roadflow is a small, local web application for exploring an agent-based traffic 
 
 ## Run locally
 
-Requires Python 3.9+ and no third-party packages.
+Requires Python 3.9+ and no third-party Python packages.
 
 ```bash
 python3 -m unittest discover -v
@@ -19,7 +19,7 @@ The scenario selector offers three built-in scenarios:
 
 - **Synthetic Central Flyover** (baseline): a one-lane west approach, two-lane east departure, north/south approach, signal-controlled at-grade junction, and a separate two-lane flyover. The flyover crosses the drawing without a junction node, so it cannot be used to turn onto the at-grade network; only explicitly connected road endpoints create routes. This flyover is intentionally isolated and carries no demand.
 - **Active Flyover Crossing**: at-grade turning traffic uses the signal-controlled junction while north-south demand is routed over an elevated flyover with connected entry and exit ramps. The ground junction and elevated crossing are separate graph nodes at the same map coordinates, with no edge between them. The flyover carries non-zero demand and utilisation.
-- **Road Capacity Comparison**: two parallel corridors receive the same demand. The narrow corridor has capacities 4/1 and the wide corridor 12/6. Generated/completed vehicles, average travel and waiting times, and per-road utilisation are all reported from the simulation so the two corridors can be compared.
+- **Road Capacity Comparison**: two parallel corridors receive the same demand rate and seed. Realized arrivals are not paired because each demand entry draws independently, and the narrow origin rejects more attempts when full. The narrow corridor has capacities 4/1 and the wide corridor 12/6. Generated/completed vehicles, average travel and waiting times, and per-road utilisation are all reported from the simulation so the two corridors can be compared.
 
 ## Model and metrics
 
@@ -36,7 +36,7 @@ The engine (`app/engine.py`) is independent of the HTTP/UI layer. It uses a seed
 
 ## Architecture
 
-`app/engine.py` holds routing, signals, capacity, movement and metrics. `app/demo.py` holds the synthetic scenarios and catalog. `app/server.py` provides `GET /api/scenario`, `GET /api/scenarios` and `POST /api/run`; `app/wsgi.py` exposes the same app as a WSGI entrypoint for serverless hosting; `web/` is a dependency-free browser client. The browser exports JSON locally, without storing data remotely.
+`app/engine.py` holds routing, signals, capacity, movement and metrics. `app/demo.py` holds the synthetic scenarios and catalog. `app/server.py` provides `GET /api/scenario`, `GET /api/scenarios` and `POST /api/run`; `app/wsgi.py` exposes the same app as a WSGI entrypoint for serverless hosting; `web/` is a vanilla JavaScript client with no framework. The browser exports JSON locally, without storing data remotely. The stylesheet loads Google Fonts with local fallbacks, so the UI remains usable offline.
 
 ## Verification
 

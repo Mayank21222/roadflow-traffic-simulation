@@ -10,7 +10,7 @@ The active-flyover scenario connects the north approach to the elevated west end
 
 Routing is breadth-first by number of roads. At a signalised node, a movement must occur in at least one declared phase to be routable; this represents permanently prohibited turns. A non-signalised node permits each geometrically connected outgoing road. In the active-flyover scenario, the junction signal permits west-to-east, west-to-south and north-to-east movements but not a direct north-to-south ground movement, so north-to-south demand is routed over the ramps and elevated segments.
 
-The capacity-comparison scenario uses two independent parallel corridors with explicit capacities. Both receive the same demand rate; the narrow corridor has capacities 4/1 and the wide corridor 12/6. It is a synthetic comparison, not a calibrated capacity analysis.
+The capacity-comparison scenario uses two independent parallel corridors with explicit capacities. Both receive the same demand rate; the narrow corridor has capacities 4/1 and the wide corridor 12/6. The corridors share one seeded RNG stream and each demand entry draws independently, so realized arrivals are not paired; differences include sampling variation as well as capacity admission effects. It is a synthetic comparison, not a calibrated capacity analysis.
 
 ## Vehicle agents and ticks
 
@@ -23,6 +23,8 @@ Each generated vehicle stores an ID, route, current route index, progress, entry
 5. Occupancy/utilisation and exit queues are sampled.
 
 Processing order is ascending vehicle ID. This is a simplification: when multiple agents target the final downstream slot in one tick, the lower-ID agent receives it.
+
+Because each agent performs at most one action per tick, a successful road-to-road transfer consumes that tick; progress on the downstream road starts on the following tick. Average travel time therefore includes transfer ticks as well as signal and queue waiting. Occupancy and queue samples are taken after generation and movement for the tick, so a transferred vehicle is counted on its new road for that tick.
 
 ## Parameters and assumptions
 

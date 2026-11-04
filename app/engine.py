@@ -67,6 +67,9 @@ class Simulation:
             raise ScenarioError("scenario requires nodes and roads arrays")
         if not isinstance(signals, list) or not isinstance(demand_entries, list):
             raise ScenarioError("signals and demand must be arrays")
+        seed = scenario.get("seed", 1)
+        if seed is None or not isinstance(seed, (int, float, str)):
+            raise ScenarioError("seed must be a number or string")
         node_ids = [node.get("id") for node in nodes if isinstance(node, dict)]
         road_ids = [road.get("id") for road in roads if isinstance(road, dict)]
         if (len(node_ids) != len(nodes) or any(not isinstance(node_id, str) or not node_id for node_id in node_ids)
@@ -79,8 +82,15 @@ class Simulation:
             if road.get("from") not in node_ids or road.get("to") not in node_ids:
                 raise ScenarioError(f"road {road.get('id')} references an unknown node")
             try:
-                lanes, length, speed = int(road["lanes"]), float(road["length"]), float(road["speed_limit"])
-                capacity = int(road.get("capacity", lanes * 6))
+                lanes_value = road["lanes"]
+                lanes = int(lanes_value)
+                if float(lanes_value) != lanes:
+                    raise ValueError("lanes must be an integer")
+                length, speed = float(road["length"]), float(road["speed_limit"])
+                capacity_value = road.get("capacity", lanes * 6)
+                capacity = int(capacity_value)
+                if float(capacity_value) != capacity:
+                    raise ValueError("capacity must be an integer")
                 width = float(road.get("width", 1))
             except (KeyError, TypeError, ValueError) as exc:
                 raise ScenarioError(f"road {road.get('id')} has invalid dimensions") from exc
@@ -97,7 +107,10 @@ class Simulation:
             for phase in signal["phases"]:
                 if not isinstance(phase, dict):
                     raise ScenarioError("signal phases must be objects")
-                for movement in phase.get("movements", []):
+                movements = phase.get("movements", [])
+                if not isinstance(movements, list):
+                    raise ScenarioError("signal phase movements must be an array")
+                for movement in movements:
                     if not isinstance(movement, list) or len(movement) != 2:
                         raise ScenarioError("a signal movement must be [incoming_road, outgoing_road]")
                     incoming, outgoing = movement
@@ -119,8 +132,9 @@ class Simulation:
 
     def road_capacity(self, road_id: str) -> int:
         road = self.roads[road_id]
-        # Explicit capacity wins; otherwise a transparent prototype rule.
-        return int(road.get("capacity", road["lanes"] * 6))
+        if "capacity" in road:
+            return int(road["capacity"])
+        return int(road["lanes"]) * 6
 
     def travel_ticks(self, road_id: str) -> int:
         road = self.roads[road_id]

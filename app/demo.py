@@ -61,7 +61,7 @@ ACTIVE_FLYOVER_SCENARIO = {
 
 CAPACITY_SCENARIO = {
     "name": "Road Capacity Comparison",
-    "description": "Two parallel corridors receive the same demand; the narrow corridor has capacity 4/1 and the wide corridor capacity 12/6.",
+    "description": "Two parallel corridors receive the same demand rate; the narrow corridor has capacity 4/1 and the wide corridor capacity 12/6.",
     "seed": 42,
     "nodes": [
         {"id": "narrow_west", "x": 70, "y": 120}, {"id": "narrow_mid", "x": 340, "y": 120},

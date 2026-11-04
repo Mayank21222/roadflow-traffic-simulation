@@ -1,6 +1,11 @@
 let scenarios = [];
 let baseScenario, lastResults, lastScenario;
+let runToken = 0;
 const $ = (id) => document.getElementById(id);
+function invalidateRun(message) {
+  runToken += 1;
+  if (message && $("run").disabled) $("status").textContent = message;
+}
 
 function formatDemandLabel(demand) {
   if (demand.label) return demand.label;
@@ -62,7 +67,10 @@ function renderDemandControls(scenario) {
     return `<label>${formatDemandLabel(demand)}<input id="${id}" type="range" min="0" max="1" step=".01" value="${demand.rate}"><output id="${id}-out">${Number(demand.rate).toFixed(2)}</output></label>`;
   }).join("");
   document.querySelectorAll("#demandControls input[type=range]").forEach(input => {
-    input.addEventListener("input", () => $(`${input.id}-out`).value = input.value);
+    input.addEventListener("input", () => {
+      $(`${input.id}-out`).value = input.value;
+      invalidateRun("Controls changed; previous run discarded.");
+    });
   });
 }
 function renderResults(results) {
@@ -72,6 +80,7 @@ function renderResults(results) {
   $("roadTable").innerHTML = `<table><thead><tr><th>Road</th><th>Average utilisation</th><th>Max exit queue</th><th>Current occupancy</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function activateScenario(scenario, statusText) {
+  invalidateRun();
   baseScenario = scenario;
   $("scenario").value = scenario.name;
   $("seed").value = scenario.seed;
@@ -87,20 +96,25 @@ function activateScenario(scenario, statusText) {
   $("status").textContent = statusText || `Loaded ${scenario.name}.`;
 }
 async function run() {
+  const token=++runToken;
   const button=$("run"); button.textContent="Simulating…"; button.disabled=true; $("status").textContent="Running synthetic simulation…";
   try {
     const scenario=scenarioFromControls();
     const response=await fetch("/api/run", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scenario,ticks:Number($("ticks").value)})});
-    const payload=await response.json(); if (!response.ok) throw new Error(payload.error);
+    const payload=await response.json();
+    if (token !== runToken) return;
+    if (!response.ok) throw new Error(payload.error);
     lastResults=payload.results; lastScenario=scenario; renderResults(lastResults); renderNetwork(scenario); $("exportResults").disabled=false;
     $("status").textContent=`Completed ${lastResults.tick} ticks: ${lastResults.completed} vehicles completed.`;
-  } catch(error) { $("status").textContent=`Simulation could not run: ${error.message}`; alert(`Simulation could not run: ${error.message}`); }
+  } catch(error) { if (token !== runToken) return; $("status").textContent=`Simulation could not run: ${error.message}`; alert(`Simulation could not run: ${error.message}`); }
   finally {button.textContent="Run simulation";button.disabled=false;}
 }
 $("scenario").addEventListener("change", () => {
   const scenario = scenarios.find(item => item.name === $("scenario").value);
   if (scenario) activateScenario(scenario);
 });
+$("seed").addEventListener("input", () => invalidateRun("Controls changed; previous run discarded."));
+$("ticks").addEventListener("input", () => invalidateRun("Controls changed; previous run discarded."));
 $("run").addEventListener("click",run);
 $("reset").addEventListener("click",() => activateScenario(baseScenario, "Controls reset to scenario defaults."));
 $("exportScenario").addEventListener("click",()=>download("roadflow-scenario.json",scenarioFromControls()));
