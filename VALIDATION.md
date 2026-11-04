@@ -63,7 +63,7 @@ To reproduce manually, start `python3 -m app.server`, open `http://127.0.0.1:800
 
 The live deployment is <https://roadflow-traffic-simulation.vercel.app>, built from the repository's Vercel configuration. Vercel's free Hobby plan runs `app/wsgi.py` as a Python WSGI function; no paid features are used. Render and Railway were not used because no Render credentials were available and the Railway token had expired.
 
-Verified against the public URL:
+The final audit build (commit `235d14e`) was redeployed to the same production alias and re-verified against the public URL:
 
 - `GET /`, `/app.js`, `/style.css`, and `/status.css` returned 200 with the expected HTML/CSS/JavaScript content types.
 - `GET /api/scenario` returned 200 with the baseline synthetic scenario.
@@ -73,6 +73,7 @@ Verified against the public URL:
 - Malformed JSON returned 400, an unknown path returned 404, and an unsupported method returned 405.
 - Headless Chrome 156 through the Chrome DevTools Protocol loaded the public page, found all three scenarios, and ran each one. The baseline displayed 83/76/7; Active Flyover Crossing displayed 113/103/10 with non-zero utilisation on both elevated segments and both ramps; Road Capacity Comparison displayed 120/111/9 with higher utilisation on the narrow corridor. Reset and both JSON exports worked, and there were no console errors or horizontal overflow at 390px.
 - No browser console errors remained after adding an inline empty favicon to suppress the browser's automatic `/favicon.ico` request.
+- The final build returned 400 for `seed: null`, fractional lanes/capacities, and null signal movements; accepted numeric-string lanes; and returned 405 for `GET /api/run`. A path-traversal probe returned 400 (no file disclosure), while local/WSGI returned 404.
 - Vercel runtime logs recorded the function invocations. Serverless cold starts can add latency; the verified runs completed successfully.
 
 ## Final independent audit (2026-11-04)

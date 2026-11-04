@@ -73,6 +73,7 @@ Verified after the audit:
 - High demand produced 177 generated, 167 completed, 10 active, maximum queue 5. Zero-demand and empty runs reconciled; no capacity overflow was observed in the stepped audit.
 - Local HTTP and direct WSGI checks passed for all three scenarios, malformed input (400), unknown paths/path traversal (404), unsupported WSGI methods (405), and tick clamping.
 - Headless Chrome verified the stale-run race, export pairing, reset, all three scenario metrics/networks, accessibility basics, no horizontal overflow at 320–1440px, and no console errors.
+- The final audit build (commit `235d14e`) was redeployed to <https://roadflow-traffic-simulation.vercel.app> and re-verified: all three live scenario runs matched, the new validation cases returned 400, `GET /api/run` returned 405, and the live browser workflow passed with the stale-run guard.
 - Provenance: the original Codex JSONL is untouched and matches the unlisted gist. The later work used one OpenCode session (`ses_e6050ec1fffet4Spnk2j56Xzxs`). All commit author metadata reads `Codex <codex@local>` because of local Git configuration; later commits are OpenCode work.
 - **Critical process finding:** `prompt.md` requests one Codex/Claude session, but later work used OpenCode. This cannot be corrected without falsifying history, so it is disclosed in `VALIDATION.md` and here.
 
