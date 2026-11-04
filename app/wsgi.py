@@ -6,7 +6,7 @@ from http import HTTPStatus
 from pathlib import Path
 from urllib.parse import unquote
 
-from .demo import DEMO_SCENARIO
+from .demo import DEMO_SCENARIO, SCENARIOS
 from .server import run_payload
 
 WEB = Path(__file__).resolve().parent.parent / "web"
@@ -56,6 +56,11 @@ def app(environ, start_response):
         if method != "GET":
             return _json(start_response, {"error": "Method not allowed"}, HTTPStatus.METHOD_NOT_ALLOWED)
         return _json(start_response, DEMO_SCENARIO)
+
+    if path == "/api/scenarios":
+        if method != "GET":
+            return _json(start_response, {"error": "Method not allowed"}, HTTPStatus.METHOD_NOT_ALLOWED)
+        return _json(start_response, SCENARIOS)
 
     if path == "/api/run":
         if method != "POST":

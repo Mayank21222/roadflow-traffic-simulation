@@ -9,19 +9,30 @@ python3 -m unittest discover -v
 PYTHONPYCACHEPREFIX=/private/tmp/roadflow-pycache python3 -m compileall -q app tests
 ```
 
-At the latest verification in this session, the unit suite passed **14/14** tests:
+At the latest verification, the unit suite passed **21/21** tests:
 
+- baseline 80-tick regression;
 - connected and prohibited routing;
 - vehicle movement/completion;
 - red signal waiting;
 - capacity-induced queue;
-- flyover grade separation;
+- baseline flyover grade separation;
+- active-flyover ramp routing, node separation, and ground-junction flow;
+- active-flyover vehicle movement across the elevated crossing;
+- capacity-comparison metrics;
+- scenario catalog and deterministic execution;
+- API execution for every catalog scenario;
 - metrics creation and destination-road queue exclusion;
 - fixed-seed repeatability;
 - API tick clamp;
 - invalid network, signal, malformed optional collections, demand, tick, and payload rejection.
 
-A deterministic 80-tick demo run was also executed in this session. With seed 42 and the built-in demand, it reported 83 generated, 76 completed, 7 active, 6.14 average travel ticks, 1.14 average waiting ticks, and a maximum queue of 4. These are a reproducibility smoke-check for the current engine version, not benchmark or validation figures.
+A deterministic 80-tick baseline run still reports 83 generated, 76 completed, 7 active, 6.14 average travel ticks, 1.14 average waiting ticks, and a maximum queue of 4. These are a reproducibility smoke-check for the current engine version, not benchmark or validation figures.
+
+The two added scenarios were also run for 80 ticks:
+
+- **Active Flyover Crossing:** 113 generated, 103 completed, 10 active, 7.06 average travel ticks, 0.74 average waiting ticks, maximum queue 6. Both elevated-road segments and both ramps had non-zero utilisation.
+- **Road Capacity Comparison:** 120 generated, 111 completed, 9 active, 6.23 average travel ticks, 1.23 average waiting ticks, maximum queue 3. The narrow road reached 84% utilisation versus 24% for the wide road; the narrow exit reached 96% versus 31% for the wide exit.
 
 ## Manual/browser verification status
 
@@ -29,9 +40,14 @@ The original Codex build session could not expose a browser surface or bind a lo
 
 - `GET /` and all static assets return 200 with correct content types; unknown paths return 404.
 - `POST /api/run` returns 200 for valid payloads and 400 for malformed JSON or scenarios; tick values are clamped.
-- The network renders 5 roads, 7 nodes, 1 signal, and 1 dashed flyover.
+- The baseline network renders 5 roads, 7 nodes, 1 signal, and 1 dashed flyover.
 - Changing seed/demand/ticks and running updates all metrics and the road table; both JSON exports download and parse.
 - Reset clears results, disables results export, and restores the demo controls.
+- The scenario selector lists all three scenarios. Selecting one updates the description, network, demand controls, seed, and ticks.
+- **Active Flyover Crossing** renders 8 roads (4 at-grade, 2 elevated, 2 ramp), 1 elevated node, and 2 ramp nodes. `junction` and `fly_cross` share map coordinates `(330, 225)` but remain separate graph nodes. The 80-tick run displays 113 generated, 103 completed, 10 active, 7.06 travel, 0.74 waiting, maximum queue 6, and non-zero utilisation on both elevated segments and both ramps.
+- **Road Capacity Comparison** renders 4 at-grade roads. The 80-tick run displays 120 generated, 111 completed, 9 active, 6.23 travel, 1.23 waiting, maximum queue 3, and clearly higher utilisation on the narrow corridor.
+- Reset restores the selected scenario's defaults, clears results, and disables results export.
+- Scenario and results JSON downloads parse for all three scenarios; results exports are paired with the scenario and metrics that produced them.
 - The layout is single-column below 800px with no horizontal overflow at 360–1024px; a 1px table overflow was observed at 320px.
 - No browser console errors were observed.
 
@@ -39,7 +55,7 @@ Screenshots were captured but not visually inspected because the verification mo
 
 After the slider step was corrected from `.05` to `.01`, the default browser run reproduces the documented demo figures (83 generated, 76 completed, 7 active, 6.14 average travel, 1.14 average waiting, maximum queue 4), and Reset restores demand `0.62`/`0.42`.
 
-To reproduce manually, start `python3 -m app.server`, open `http://127.0.0.1:8000`, adjust both demand sliders and seed, run/reset, and use both export buttons.
+To reproduce manually, start `python3 -m app.server`, open `http://127.0.0.1:8000`, choose each scenario, adjust its demand sliders and seed, run/reset, and use both export buttons.
 
 ## Hosted deployment verification
 

@@ -7,7 +7,7 @@ from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from .demo import DEMO_SCENARIO
+from .demo import DEMO_SCENARIO, SCENARIOS
 from .engine import Simulation
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -38,6 +38,8 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/api/scenario":
             return self._json(DEMO_SCENARIO)
+        if self.path == "/api/scenarios":
+            return self._json(SCENARIOS)
         return super().do_GET()
 
     def do_POST(self):

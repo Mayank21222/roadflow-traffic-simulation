@@ -4,9 +4,13 @@ Roadflow is a deterministic, discrete-time, agent-based traffic prototype. It us
 
 ## Network and connectivity
 
-A scenario contains directed roads and named nodes. A road connects only its explicit `from` and `to` nodes. Two lines crossing in the drawn map do not create an edge: the demo flyover is level 1 and has separate endpoints from the level-0 junction. A ramp/connector must be a road to make a grade-separated connection usable.
+A scenario contains directed roads and named nodes. A road connects only its explicit `from` and `to` nodes. Two lines crossing in the drawn map do not create an edge: the baseline flyover is level 1 and has separate endpoints from the level-0 junction. A ramp/connector must be a road to make a grade-separated connection usable.
 
-Routing is breadth-first by number of roads. At a signalised node, a movement must occur in at least one declared phase to be routable; this represents permanently prohibited turns. A non-signalised node permits each geometrically connected outgoing road.
+The active-flyover scenario connects the north approach to the elevated west end by a ramp, runs elevated segments through a separate `fly_cross` node at the same coordinates as the ground `junction`, and connects the elevated east end to the south approach by an exit ramp. There is no edge between `junction` and `fly_cross`, so at-grade traffic cannot enter the flyover at the visual crossing.
+
+Routing is breadth-first by number of roads. At a signalised node, a movement must occur in at least one declared phase to be routable; this represents permanently prohibited turns. A non-signalised node permits each geometrically connected outgoing road. In the active-flyover scenario, the junction signal permits west-to-east, west-to-south and north-to-east movements but not a direct north-to-south ground movement, so north-to-south demand is routed over the ramps and elevated segments.
+
+The capacity-comparison scenario uses two independent parallel corridors with explicit capacities. Both receive the same demand rate; the narrow corridor has capacities 4/1 and the wide corridor 12/6. It is a synthetic comparison, not a calibrated capacity analysis.
 
 ## Vehicle agents and ticks
 

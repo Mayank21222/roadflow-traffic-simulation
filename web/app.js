@@ -1,11 +1,18 @@
+let scenarios = [];
 let baseScenario, lastResults, lastScenario;
 const $ = (id) => document.getElementById(id);
 
+function formatDemandLabel(demand) {
+  if (demand.label) return demand.label;
+  const name = (id) => id.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return `${name(demand.origin)} → ${name(demand.destination)} demand / tick`;
+}
 function scenarioFromControls() {
   const scenario = structuredClone(baseScenario);
   scenario.seed = Number($("seed").value);
-  scenario.demand[0].rate = Number($("westRate").value);
-  scenario.demand[1].rate = Number($("northRate").value);
+  document.querySelectorAll("#demandControls input[type=range]").forEach((input, index) => {
+    if (scenario.demand[index]) scenario.demand[index].rate = Number(input.value);
+  });
   return scenario;
 }
 function download(name, data) {
@@ -13,18 +20,71 @@ function download(name, data) {
   const url = URL.createObjectURL(blob), link = Object.assign(document.createElement("a"), {href:url, download:name});
   link.click(); URL.revokeObjectURL(url);
 }
+function roadClass(road) {
+  if (road.kind === "ramp") return "ramp";
+  if (road.kind === "elevated" || road.level) return "flyover";
+  return "";
+}
+function nodeClass(node) {
+  if (node.kind === "elevated") return "elevated-node";
+  if (node.kind === "ramp") return "ramp-node";
+  return "";
+}
+function roadLabelOffset(road) {
+  if (road.kind === "ramp") return 16;
+  if (road.kind === "elevated" || road.level) return -12;
+  return -10;
+}
+function nodeLabelOffset(node) {
+  if (node.kind === "elevated") return {dx:13, dy:20};
+  if (node.kind === "ramp") return {dx:10, dy:16};
+  return {dx:10, dy:-10};
+}
 function renderNetwork(scenario) {
   const nodes = Object.fromEntries(scenario.nodes.map(n => [n.id,n]));
-  const roadSvg = scenario.roads.map(r => `<line class="road ${r.level ? "flyover" : ""}" x1="${nodes[r.from].x}" y1="${nodes[r.from].y}" x2="${nodes[r.to].x}" y2="${nodes[r.to].y}" stroke-width="${7 + r.lanes * 3}"/><text class="label" x="${(nodes[r.from].x+nodes[r.to].x)/2}" y="${(nodes[r.from].y+nodes[r.to].y)/2-10}">${r.id}</text>`).join("");
-  const nodeSvg = scenario.nodes.map(n => `<circle class="node" cx="${n.x}" cy="${n.y}" r="7"/><text class="label" x="${n.x+10}" y="${n.y-10}">${n.id}</text>`).join("");
-  const signal = scenario.signals.map(s => {const n=nodes[s.node];return `<circle class="signal" cx="${n.x}" cy="${n.y}" r="4"/>`}).join("");
-  $("map").innerHTML = roadSvg + nodeSvg + signal;
+  const roadSvg = scenario.roads.map(r => {
+    const from = nodes[r.from], to = nodes[r.to];
+    return `<line class="road ${roadClass(r)}" data-road="${r.id}" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke-width="${7 + r.lanes * 3}"/><text class="label" x="${(from.x+to.x)/2}" y="${(from.y+to.y)/2+roadLabelOffset(r)}">${r.id}</text>`;
+  }).join("");
+  const nodeSvg = scenario.nodes.map(n => {
+    const offset = nodeLabelOffset(n);
+    return `<circle class="node ${nodeClass(n)}" data-node="${n.id}" cx="${n.x}" cy="${n.y}" r="${n.kind === "elevated" ? 11 : 7}"/><text class="label" x="${n.x+offset.dx}" y="${n.y+offset.dy}">${n.id}</text>`;
+  }).join("");
+  const signalSvg = (scenario.signals || []).map(s => {
+    const node = nodes[s.node];
+    return `<circle class="signal" cx="${node.x}" cy="${node.y}" r="4"/>`;
+  }).join("");
+  $("map").innerHTML = roadSvg + nodeSvg + signalSvg;
+}
+function renderDemandControls(scenario) {
+  $("demandControls").innerHTML = scenario.demand.map((demand, index) => {
+    const id = `demand-${index}`;
+    return `<label>${formatDemandLabel(demand)}<input id="${id}" type="range" min="0" max="1" step=".01" value="${demand.rate}"><output id="${id}-out">${Number(demand.rate).toFixed(2)}</output></label>`;
+  }).join("");
+  document.querySelectorAll("#demandControls input[type=range]").forEach(input => {
+    input.addEventListener("input", () => $(`${input.id}-out`).value = input.value);
+  });
 }
 function renderResults(results) {
   const metrics = [["Vehicles generated",results.generated],["Vehicles completed",results.completed],["Average travel time",`${results.average_travel_time} ticks`],["Average waiting time",`${results.average_waiting_time} ticks`],["Maximum queue",results.max_queue_length],["Active now",results.active]];
   $("metrics").innerHTML = metrics.map(([label,value]) => `<article><span>${label}</span><strong>${value}</strong></article>`).join("");
   const rows = Object.entries(results.roads).map(([id,r]) => `<tr><td>${id}</td><td>${Math.round(r.utilisation*100)}%</td><td>${r.max_queue}</td><td>${r.occupancy}</td></tr>`).join("");
   $("roadTable").innerHTML = `<table><thead><tr><th>Road</th><th>Average utilisation</th><th>Max exit queue</th><th>Current occupancy</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function activateScenario(scenario, statusText) {
+  baseScenario = scenario;
+  $("scenario").value = scenario.name;
+  $("seed").value = scenario.seed;
+  $("ticks").value = 80;
+  $("scenarioNote").textContent = scenario.description || "";
+  renderDemandControls(scenario);
+  renderNetwork(scenario);
+  lastResults = null;
+  lastScenario = null;
+  $("exportResults").disabled = true;
+  $("metrics").innerHTML = "";
+  $("roadTable").innerHTML = "";
+  $("status").textContent = statusText || `Loaded ${scenario.name}.`;
 }
 async function run() {
   const button=$("run"); button.textContent="Simulating…"; button.disabled=true; $("status").textContent="Running synthetic simulation…";
@@ -37,9 +97,31 @@ async function run() {
   } catch(error) { $("status").textContent=`Simulation could not run: ${error.message}`; alert(`Simulation could not run: ${error.message}`); }
   finally {button.textContent="Run simulation";button.disabled=false;}
 }
-for (const id of ["westRate","northRate"]) $(id).addEventListener("input", () => $(id === "westRate" ? "westOut" : "northOut").value=$(id).value);
+$("scenario").addEventListener("change", () => {
+  const scenario = scenarios.find(item => item.name === $("scenario").value);
+  if (scenario) activateScenario(scenario);
+});
 $("run").addEventListener("click",run);
-$("reset").addEventListener("click",()=>{ $("seed").value=baseScenario.seed;$("westRate").value=baseScenario.demand[0].rate;$("northRate").value=baseScenario.demand[1].rate;$("westOut").value=$("westRate").value;$("northOut").value=$("northRate").value;$("ticks").value=80;lastResults=null;lastScenario=null;$("exportResults").disabled=true;$("status").textContent="Controls reset to synthetic demo inputs.";renderNetwork(baseScenario);$("metrics").innerHTML="";$("roadTable").innerHTML="";});
+$("reset").addEventListener("click",() => activateScenario(baseScenario, "Controls reset to scenario defaults."));
 $("exportScenario").addEventListener("click",()=>download("roadflow-scenario.json",scenarioFromControls()));
 $("exportResults").addEventListener("click",()=>download("roadflow-results.json",{scenario:lastScenario,results:lastResults}));
-baseScenario=await (await fetch("/api/scenario")).json();renderNetwork(baseScenario);
+async function loadScenarioCatalog() {
+  try {
+    const response = await fetch("/api/scenarios");
+    if (!response.ok) throw new Error("catalog unavailable");
+    const data = await response.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error("catalog unavailable");
+    return data;
+  } catch {
+    const response = await fetch("/api/scenario");
+    if (!response.ok) throw new Error("scenario unavailable");
+    return [await response.json()];
+  }
+}
+try {
+  scenarios = await loadScenarioCatalog();
+  $("scenario").innerHTML = scenarios.map(scenario => `<option value="${scenario.name}">${scenario.name}</option>`).join("");
+  activateScenario(scenarios[0], "Ready with synthetic demo inputs.");
+} catch (error) {
+  $("status").textContent = `Scenario could not load: ${error.message}`;
+}
