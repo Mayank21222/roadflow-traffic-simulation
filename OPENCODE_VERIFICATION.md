@@ -8,7 +8,7 @@ OpenCode's own session data remains under `/Users/mayankkashyap/.local/share/ope
 
 ## Scope
 
-Read-only verification first, followed by two approved bug fixes, deployment support, and documentation updates. No model, demo scenario, architecture, or Git-history rewrite.
+Read-only verification first, followed by two approved bug fixes, deployment support, documentation updates, and a final scenario enhancement. The simulation engine was not changed. The baseline scenario data and its 83/76 result were preserved; the new scenarios were added alongside it. No Git-history rewrite.
 
 ## Verified before changes
 
@@ -33,6 +33,25 @@ Read-only verification first, followed by two approved bug fixes, deployment sup
 - Fresh headless Chrome: initial 0.62/0.42, default run 83/76, results export remains paired with the run scenario after controls change, Reset restores 0.62/0.42 and clears results, no console errors, no horizontal overflow at 390px.
 - Public Vercel deployment verified at <https://roadflow-traffic-simulation.vercel.app>: static assets 200, `/api/scenario` 200, valid `/api/run` 200 with 83/76/7 and the documented metrics, malformed JSON 400, unknown path 404, unsupported method 405, and a full headless-Chrome run/reset with no console errors.
 - The final bundle is regenerated after the commits, cloned successfully, and checked against the active HEAD and checksum file.
+
+## Scenario enhancement
+
+The final requested enhancement added a functional scenario selector and two new scenarios while retaining the baseline:
+
+- **Synthetic Central Flyover** remains unchanged and still produces 83 generated / 76 completed at 80 ticks.
+- **Active Flyover Crossing** adds connected entry/exit ramps, two elevated road segments, a separate `fly_cross` node at the same coordinates as the ground `junction`, and ground-level turning demand. The junction signal omits the direct north-to-south ground movement, so that demand routes over the flyover. There is no edge between `junction` and `fly_cross`.
+- **Road Capacity Comparison** runs two parallel corridors under the same demand, with explicit narrow capacities 4/1 and wide capacities 12/6.
+
+`GET /api/scenarios` was added for the catalog; `GET /api/scenario` remains for compatibility. The browser now builds demand sliders from the selected scenario, updates the network view, and distinguishes at-grade, elevated, and ramp roads. The engine, API payload contract, and local JSON export flow were retained.
+
+Verified after the enhancement:
+
+- `python3 -m unittest discover -v`: **21/21** passed; `compileall` passed.
+- Baseline 80-tick result unchanged: 83 generated, 76 completed, 7 active, 6.14 travel, 1.14 waiting, maximum queue 4.
+- Active Flyover Crossing: 113 generated, 103 completed, 10 active, 7.06 travel, 0.74 waiting, maximum queue 6; both elevated segments and both ramps had non-zero utilisation. Routing and separation tests pass.
+- Road Capacity Comparison: 120 generated, 111 completed, 9 active, 6.23 travel, 1.23 waiting, maximum queue 3; narrow road 84% vs wide road 24%, narrow exit 96% vs wide exit 31%.
+- Local and live headless Chrome runs: all three scenarios selected and ran; descriptions, networks, demand controls, seed, and ticks updated; Reset cleared results and restored scenario defaults; both JSON exports parsed; no console errors; no horizontal overflow at 390px.
+- The existing Vercel project was redeployed and the public URL was verified: `/api/scenarios` returned 200, each scenario returned the expected 80-tick result, and the live browser workflow passed.
 
 ## Limitations
 

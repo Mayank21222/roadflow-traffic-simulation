@@ -11,7 +11,7 @@ python3 -m unittest discover -v
 python3 -m app.server
 ```
 
-Then open [http://127.0.0.1:8000](http://127.0.0.1:8000). Use the scenario controls to adjust demand and seed, run it, and download either the scenario JSON or scenario-plus-results JSON.
+Then open [http://127.0.0.1:8000](http://127.0.0.1:8000). Choose a scenario, adjust its demand and seed, run it, and download either the scenario JSON or scenario-plus-results JSON.
 
 ## Scenarios
 

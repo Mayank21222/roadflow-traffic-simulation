@@ -64,12 +64,14 @@ The live deployment is <https://roadflow-traffic-simulation.vercel.app>, built f
 Verified against the public URL:
 
 - `GET /`, `/app.js`, `/style.css`, and `/status.css` returned 200 with the expected HTML/CSS/JavaScript content types.
-- `GET /api/scenario` returned 200 with the built-in synthetic scenario.
-- `POST /api/run` with `{"ticks":80}` returned 200 with 83 generated, 76 completed, 7 active, 6.14 average travel, 1.14 average waiting, and maximum queue 4.
+- `GET /api/scenario` returned 200 with the baseline synthetic scenario.
+- `GET /api/scenarios` returned 200 with all three catalog scenarios.
+- `POST /api/run` with `{"ticks":80}` returned 200 with the baseline result: 83 generated, 76 completed, 7 active, 6.14 average travel, 1.14 average waiting, and maximum queue 4.
+- `POST /api/run` returned the expected 80-tick results for the added scenarios: Active Flyover Crossing 113/103/10 with 7.06 travel, 0.74 waiting, and maximum queue 6; Road Capacity Comparison 120/111/9 with 6.23 travel, 1.23 waiting, and maximum queue 3.
 - Malformed JSON returned 400, an unknown path returned 404, and an unsupported method returned 405.
-- Headless Chrome 156 through the Chrome DevTools Protocol loaded the public page, found the initial `0.62`/`0.42` demand and 80 ticks, ran the simulation, displayed “Completed 80 ticks: 76 vehicles completed.” with all six metrics and five road rows, enabled results export, and restored the controls/cleared results on Reset.
+- Headless Chrome 156 through the Chrome DevTools Protocol loaded the public page, found all three scenarios, and ran each one. The baseline displayed 83/76/7; Active Flyover Crossing displayed 113/103/10 with non-zero utilisation on both elevated segments and both ramps; Road Capacity Comparison displayed 120/111/9 with higher utilisation on the narrow corridor. Reset and both JSON exports worked, and there were no console errors or horizontal overflow at 390px.
 - No browser console errors remained after adding an inline empty favicon to suppress the browser's automatic `/favicon.ico` request.
-- Vercel runtime logs recorded the function invocations. Serverless cold starts can add latency; the verified run completed successfully.
+- Vercel runtime logs recorded the function invocations. Serverless cold starts can add latency; the verified runs completed successfully.
 
 ## Model validation status
 
