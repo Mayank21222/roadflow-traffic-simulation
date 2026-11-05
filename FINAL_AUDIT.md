@@ -36,12 +36,13 @@
 The project began in Codex; later verification and auditing used OpenCode. The preferred single-session workflow was not followed throughout, and this is not claimed.
 
 - Original Codex session ID: `01a19f99-911d-7c92-8709-2d7a7534f0b9`
-- Original Codex JSONL SHA-256: `2372fc7407dec75186ebb2ebc83ddf9116dcac9842ea351110b42bb775e62e26`
-- Unlisted Codex log: <https://gist.github.com/Mayank21222/f2b649a86d0dff0254900449223f1105>
+- Archived original Codex snapshot SHA-256: `2372fc7407dec75186ebb2ebc83ddf9116dcac9842ea351110b42bb775e62e26`
+- Unlisted Codex snapshot: <https://gist.github.com/Mayank21222/f2b649a86d0dff0254900449223f1105>
+- The local Codex runtime file was later appended by Codex and may differ; it is not the archived provenance artifact. This project did not edit it.
 - OpenCode history is stored separately in its own local database/log format and is not published.
 - Git author metadata was not rewritten. It reads `Codex <codex@local>` for all commits because of local Git configuration; commits after `e9982ef` are OpenCode work.
 
-The original Codex JSONL and the unlisted Gist were not modified, reconstructed, fabricated, or merged.
+The archived original Codex snapshot and the unlisted Gist were not modified by this project, reconstructed, fabricated, or merged.
 
 ## Remaining limitations
 

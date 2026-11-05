@@ -59,7 +59,7 @@ The final audit passed **24/24** automated tests and Python compilation checks. 
 
 The project began in Codex, and later verification and auditing used OpenCode. The preferred single-session workflow was therefore not followed throughout. This is disclosed rather than hidden.
 
-The original Codex session ID is `01a19f99-911d-7c92-8709-2d7a7534f0b9`; the original JSONL SHA-256 is `2372fc7407dec75186ebb2ebc83ddf9116dcac9842ea351110b42bb775e62e26`; the unlisted log is at <https://gist.github.com/Mayank21222/f2b649a86d0dff0254900449223f1105>. OpenCode history is stored separately in its own local database/log format and is not published. Git author metadata was not rewritten. See [OPENCODE_VERIFICATION.md](OPENCODE_VERIFICATION.md) for the later work record.
+The original Codex session ID is `01a19f99-911d-7c92-8709-2d7a7534f0b9`. The archived original session snapshot (503 lines) has SHA-256 `2372fc7407dec75186ebb2ebc83ddf9116dcac9842ea351110b42bb775e62e26` and is preserved at <https://gist.github.com/Mayank21222/f2b649a86d0dff0254900449223f1105>. The local Codex runtime file was later appended by Codex and may differ; it is not the archived provenance artifact. OpenCode history is stored separately in its own local database/log format and is not published. Git author metadata was not rewritten. See [OPENCODE_VERIFICATION.md](OPENCODE_VERIFICATION.md) for the later work record.
 
 ## Deployment
 
