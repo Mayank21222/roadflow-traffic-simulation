@@ -1,10 +1,8 @@
 # OpenCode verification record
 
-This is a human-readable record of the later OpenCode verification and fix session. It is not the raw session log. The original Codex build session log remains untouched at:
+This is a human-readable record of the later OpenCode verification and fix session. It is not the raw session log. The original Codex build session log remains untouched and is not in this repository. Its session ID is `01a19f99-911d-7c92-8709-2d7a7534f0b9`; its SHA-256 is `2372fc7407dec75186ebb2ebc83ddf9116dcac9842ea351110b42bb775e62e26`; the unlisted log is at <https://gist.github.com/Mayank21222/f2b649a86d0dff0254900449223f1105>.
 
-`/Users/mayankkashyap/.codex/sessions/2026/11/03/rollout-2026-11-03T09-40-03-01a19f99-911d-7c92-8709-2d7a7534f0b9.jsonl`
-
-OpenCode's own session data remains under `/Users/mayankkashyap/.local/share/opencode/` (`opencode.db`, `log/opencode.log`); it was not edited.
+OpenCode history is stored separately in its own local database/log format and was not edited. It is not published, and this record does not reproduce raw OpenCode data. A concise public summary is in [FINAL_AUDIT.md](FINAL_AUDIT.md).
 
 ## Scope
 
@@ -74,7 +72,7 @@ Verified after the audit:
 - Local HTTP and direct WSGI checks passed for all three scenarios, malformed input (400), unknown paths/path traversal (404), unsupported WSGI methods (405), and tick clamping.
 - Headless Chrome verified the stale-run race, export pairing, reset, all three scenario metrics/networks, accessibility basics, no horizontal overflow at 320–1440px, and no console errors.
 - The final audit build (commit `235d14e`) was redeployed to <https://roadflow-traffic-simulation.vercel.app> and re-verified: all three live scenario runs matched, the new validation cases returned 400, `GET /api/run` returned 405, and the live browser workflow passed with the stale-run guard.
-- Provenance: the original Codex JSONL is untouched and matches the unlisted gist. The later work used one OpenCode session (`ses_e6050ec1fffet4Spnk2j56Xzxs`). All commit author metadata reads `Codex <codex@local>` because of local Git configuration; later commits are OpenCode work.
+- Provenance: the original Codex JSONL is untouched. Its session ID is `01a19f99-911d-7c92-8709-2d7a7534f0b9`, its SHA-256 is `2372fc7407dec75186ebb2ebc83ddf9116dcac9842ea351110b42bb775e62e26`, and it matches the unlisted gist at <https://gist.github.com/Mayank21222/f2b649a86d0dff0254900449223f1105>. Later work used OpenCode; OpenCode history is stored separately in its own local database/log format and is not published. All commit author metadata reads `Codex <codex@local>` because of local Git configuration; later commits are OpenCode work.
 - **Critical process finding:** `prompt.md` requests one Codex/Claude session, but later work used OpenCode. This cannot be corrected without falsifying history, so it is disclosed in `VALIDATION.md` and here.
 
 ## Limitations

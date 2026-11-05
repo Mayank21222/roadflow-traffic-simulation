@@ -6,7 +6,7 @@ Run from the project directory:
 
 ```bash
 python3 -m unittest discover -v
-PYTHONPYCACHEPREFIX=/private/tmp/roadflow-pycache python3 -m compileall -q app tests
+PYTHONPYCACHEPREFIX="$(mktemp -d)" python3 -m compileall -q app tests
 ```
 
 At the latest verification, the unit suite passed **24/24** tests:
@@ -78,14 +78,14 @@ The final audit build (commit `235d14e`) was redeployed to the same production a
 
 ## Final independent audit (2026-11-04)
 
-A final audit inspected the engine, scenarios, API, UI, tests, documentation, deployment configuration, Git history, and session records. It added validation guards and a UI stale-run guard without changing baseline simulation results.
+A final audit inspected the engine, scenarios, API, UI, tests, documentation, deployment configuration, Git history, and session records. It added validation guards and a UI stale-run guard without changing baseline simulation results. A concise public summary is in [FINAL_AUDIT.md](FINAL_AUDIT.md).
 
 - `python3 -m unittest discover -v`: **24/24** passed; `compileall` passed.
 - Deterministic 80-tick results were unchanged: baseline 83/76/7, 6.14 travel, 1.14 waiting, maximum queue 4; Active Flyover Crossing 113/103/10, 7.06 travel, 0.74 waiting, maximum queue 6; Road Capacity Comparison 120/111/9, 6.23 travel, 1.23 waiting, maximum queue 3.
 - High demand produced 177 generated, 167 completed, 10 active, and maximum queue 5. Zero-demand and empty runs reconciled to zero; a stepped audit found no capacity overflow.
 - Local HTTP and direct WSGI checks returned 200 for the page, assets, scenario catalog, and all three scenario runs; malformed JSON/scenarios returned 400, unknown paths and path traversal returned 404, WSGI unsupported methods returned 405, and tick values were clamped to 1–5000.
 - Headless Chrome loaded all three scenarios, verified the exact metrics and network classes, checked that results exports remain paired after controls change, delayed a run and changed scenario mid-flight to confirm the stale response is discarded, and exercised reset. Accessibility checks covered labels, `aria-live`, SVG role/label, headings, and viewport. No horizontal overflow was observed at 320–1440px and no console errors were observed.
-- Provenance: the original Codex JSONL remains untouched and matches the unlisted gist (`https://gist.github.com/Mayank21222/f2b649a86d0dff0254900449223f1105`; SHA-256 `2372fc7407dec75186ebb2ebc83ddf9116dcac9842ea351110b42bb775e62e26`). The later work used one OpenCode session (`ses_e6050ec1fffet4Spnk2j56Xzxs`). Commit author metadata reads `Codex <codex@local>` for all commits because of local Git configuration; the later commits are OpenCode work. The tracked `prompt.md` asks for a single Codex/Claude session, so using OpenCode later is a Critical process/provenance finding that cannot be corrected without falsifying history; it is disclosed instead.
+- Provenance: the original Codex JSONL remains untouched. Its session ID is `01a19f99-911d-7c92-8709-2d7a7534f0b9`; its SHA-256 is `2372fc7407dec75186ebb2ebc83ddf9116dcac9842ea351110b42bb775e62e26`; it matches the unlisted gist at <https://gist.github.com/Mayank21222/f2b649a86d0dff0254900449223f1105>. Later work used OpenCode; OpenCode history is stored separately in its own local database/log format and is not published. Commit author metadata reads `Codex <codex@local>` for all commits because of local Git configuration; the later commits are OpenCode work. The tracked `prompt.md` asks for a single Codex/Claude session, so using OpenCode later is a Critical process/provenance finding that cannot be corrected without falsifying history; it is disclosed instead.
 - Remaining limitations: no real-world calibration; the local development server returns 404 for some unsupported methods while the WSGI entrypoint returns 405; WSGI `HEAD /` returns 405; Google Fonts are an external stylesheet dependency with local fallbacks; capacity-comparison arrivals share an RNG stream but are not paired; browser checks are headless/DOM checks, not human visual review.
 
 ## Model validation status

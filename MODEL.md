@@ -38,6 +38,8 @@ Because each agent performs at most one action per tick, a successful road-to-ro
 
 Lengths, speed limits, capacities, map coordinates, and demand rates in the demo are synthetic relative values, not real-world units.
 
+Scenario validation rejects null seeds, non-integer lane/capacity values, and malformed signal movements rather than coercing them silently.
+
 ## Metrics
 
 - **Generated:** agents admitted to their first road. Attempts rejected because that origin road is full are not generated.

@@ -15,7 +15,7 @@ Tests (tests/test_engine.py) ─> engine and API payload boundary
 - `app/demo.py`: the built-in synthetic scenario catalog: baseline, active flyover, and capacity comparison.
 - `app/engine.py`: schema validation, topology/routing, agent state, signal checking, capacity and metric calculation. It has no HTTP or UI dependency.
 - `app/server.py`: standard-library HTTP adapter. It serves static UI assets, provides the scenario catalog, parses JSON, and invokes the testable `run_payload` boundary.
-- `web/index.html`, `web/style.css`, `web/app.js`: vanilla JavaScript single-page client with no framework. It selects a scenario, edits seed/demand/ticks, calls the API, draws the schematic network with at-grade/elevated/ramp classes, presents metrics, and generates local JSON downloads. Google Fonts load with local fallbacks.
+- `web/index.html`, `web/style.css`, `web/app.js`: vanilla JavaScript single-page client with no framework. It selects a scenario, edits seed/demand/ticks, calls the API, draws the schematic network with at-grade/elevated/ramp classes, presents metrics, and generates local JSON downloads. A run token discards stale API responses after scenario/control changes. Google Fonts load with local fallbacks.
 - `tests/test_engine.py`: standard-library `unittest` coverage for the engine and API payload boundary.
 
 ## API contract

@@ -16,6 +16,8 @@
 | Explicit capacities in the comparison scenario | Makes the capacity effect visible in utilisation and queue metrics | Synthetic values, not a calibrated capacity study |
 | Baseline scenario left unchanged | Preserves the documented 83/76 reproducibility check | New behavior is isolated in separate scenarios |
 | Local JSON export | Lets users save scenario/results without persistence or external transfer | No import, scenario library, or durable storage |
+| Strict scenario validation | Rejects null seeds, non-integer lanes/capacities, and malformed movements instead of producing nondeterministic or misleading results | Some malformed inputs now fail rather than being coerced |
+| Client run token | Prevents a delayed API response from overwriting newer scenario/control state | Adds a small amount of client state |
 
 ## Rejected scope
 
